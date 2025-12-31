@@ -1,0 +1,41 @@
+name: HealthTech CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run tests (CI)
+      run: |
+        pytest
+
+    - name: Run main.py (runtime check)
+      run: |
+        python app/main.py
+
+    - name: Create deployment artifact (CD)
+      run: |
+        zip -r healthtech-build.zip app
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: healthtech-deployment
+        path: healthtech-build.zip
